@@ -1,113 +1,44 @@
-import { useEffect, useState } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { supabase, supabaseConfigured } from './lib/supabase';
-import ProtectedRoute from './components/ProtectedRoute';
-import Layout from './components/Layout';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Associados from './pages/Associados';
-import Animais from './pages/Animais';
-import Financeiro from './pages/Financeiro';
-import Mensalidades from './pages/Mensalidades';
-import DocumentosProcessos from './pages/DocumentosProcessos';
-import Noticias from './pages/Noticias';
-import ConselhoFiscal from './pages/ConselhoFiscal';
-import Relatorios from './pages/Relatorios';
-import Usuarios from './pages/Usuarios';
-import ConsultaPublica from './pages/ConsultaPublica';
-import ValidarDocumento from './pages/ValidarDocumento';
-import AssinarDocumento from './pages/AssinarDocumento';
-import BackupExportacoes from './pages/BackupExportacoes';
-import FormulariosSite from './pages/FormulariosSite';
-import PlanejamentoFinanceiro from './pages/PlanejamentoFinanceiro';
-import PrestacaoContas from './pages/PrestacaoContas';
+﻿import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { LayoutPrincipal } from "./ui/layouts/LayoutPrincipal";
+import { RotaProtegida } from "./core/auth/RotaProtegida";
+import { useAuthStore } from "./core/auth/authStore";
+import { useEffect } from "react";
+
+// Páginas placeholder (serão substituídas nas próximas fases)
+const Placeholder = ({ titulo, descricao }) => (
+  <div>
+    <h1 className="titulo-pagina">{titulo}</h1>
+    <p className="subtitulo-pagina">{descricao} — Em construção na próxima fase.</p>
+    <div className="card-oficial p-12 text-center text-institucional-textoSecundario">
+      <p className="text-5xl mb-3">🚧</p>
+      <p className="font-semibold">Módulo em desenvolvimento</p>
+      <p className="text-sm mt-1">Este módulo será entregue completo nas próximas etapas da v8.0</p>
+    </div>
+  </div>
+);
 
 export default function App() {
-  const [session, setSession] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!supabaseConfigured) {
-      setLoading(false);
-      return;
-    }
-
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
-      setSession(currentSession);
-    });
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    async function loadProfile() {
-      if (!session?.user?.id || !supabaseConfigured) {
-        setProfile(null);
-        return;
-      }
-
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .maybeSingle();
-
-      setProfile(data || {
-        id: session.user.id,
-        email: session.user.email,
-        nome: session.user.email,
-        perfil: 'consulta',
-        ativo: true
-      });
-    }
-
-    loadProfile();
-  }, [session]);
-
-  if (loading) {
-    return <div className="flex min-h-screen items-center justify-center text-xl font-black text-floresta">Carregando painel...</div>;
-  }
+  const carregarSessao = useAuthStore(s => s.carregarSessao);
+  useEffect(() => { carregarSessao(); }, [carregarSessao]);
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login session={session} />} />
-        <Route path="/consulta" element={<ConsultaPublica />} />
-        <Route path="/consulta/:tipo/:codigo" element={<ConsultaPublica />} />
-        <Route path="/validar" element={<ValidarDocumento />} />
-        <Route path="/validar/:codigo" element={<ValidarDocumento />} />
-        <Route path="/assinar/:token" element={<AssinarDocumento />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute session={session}>
-              <Layout session={session} profile={profile} />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Dashboard profile={profile} />} />
-          <Route path="associados" element={<Associados profile={profile} />} />
-          <Route path="animais" element={<Animais profile={profile} />} />
-          <Route path="financeiro" element={<Financeiro profile={profile} />} />
-          <Route path="planejamento-financeiro" element={<PlanejamentoFinanceiro profile={profile} />} />
-          <Route path="prestacao-contas" element={<PrestacaoContas profile={profile} />} />
-          <Route path="mensalidades" element={<Mensalidades profile={profile} />} />
-          <Route path="documentos" element={<DocumentosProcessos profile={profile} />} />
-          <Route path="atas-protocolos" element={<DocumentosProcessos profile={profile} />} />
-          <Route path="noticias" element={<Noticias profile={profile} />} />
-          <Route path="conselho-fiscal" element={<ConselhoFiscal profile={profile} />} />
-          <Route path="relatorios" element={<Relatorios profile={profile} />} />
-          <Route path="usuarios" element={<Usuarios profile={profile} />} />
-          <Route path="backup" element={<BackupExportacoes profile={profile} />} />
-          <Route path="formularios-site" element={<FormulariosSite profile={profile} />} />
+        <Route path="/login" element={<Placeholder titulo="Login" descricao="Tela de acesso ao sistema" />} />
+        <Route path="/403" element={<div className="p-20 text-center"><h1 className="text-4xl font-bold text-red-600">403</h1><p>Acesso proibido</p></div>} />
+
+        {/* ROTAS PROTEGIDAS DENTRO DO LAYOUT OFICIAL */}
+        <Route element={<RotaProtegida><LayoutPrincipal /></RotaProtegida>}>
+          <Route index element={<Placeholder titulo="🏛️  Mesa Administrativa" descricao="Painel inicial com todos os indicadores institucionais" />} />
+          <Route path="pessoas/*" element={<Placeholder titulo="👥 Central de Pessoas" descricao="Prontuário Institucional dos associados" />} />
+          <Route path="animais/*" element={<Placeholder titulo="🐎 Central Animal" descricao="Prontuário Veterinário completo" />} />
+          <Route path="financeiro/*" element={<Placeholder titulo="💰 Central Financeira" descricao="Caixa, bancos, fundos, Asaas, planejamento e prestação de contas" />} />
+          <Route path="documentos/*" element={<Placeholder titulo="📄 Central Documental" descricao="Editor, modelos, mesa de assinaturas, hash e QR" />} />
+          <Route path="processos/*" element={<Placeholder titulo="📂 Central de Processos" descricao="Fluxo processual estilo SIPAC" />} />
+          <Route path="estatisticas/*" element={<Placeholder titulo="📊 Inteligência e Estatísticas" descricao="Painéis, gráficos e indicadores" />} />
+          <Route path="portal/*" element={<Placeholder titulo="🌐 Portal Institucional" descricao="Consulta pública e validação de documentos" />} />
+          <Route path="admin/*" element={<Placeholder titulo="⚙️ Administração" descricao="Usuários, permissões, configurações e logs" />} />
         </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

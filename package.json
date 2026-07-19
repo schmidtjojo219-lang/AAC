@@ -11,16 +11,21 @@
   "dependencies": {
     "@supabase/supabase-js": "latest",
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
+    "clsx": "^2.1.1",
+    "crypto-js": "^4.2.0",
+    "date-fns": "^3.6.0",
+    "lucide-react": "latest",
+    "qrcode": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "react-router-dom": "latest",
-    "lucide-react": "latest",
-    "qrcode": "latest"
+    "react-router-dom": "^6.30.4",
+    "tailwind-merge": "^2.6.1",
+    "vite": "latest",
+    "zustand": "^4.5.7"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.17",
+    "autoprefixer": "latest",
     "postcss": "latest",
-    "autoprefixer": "latest"
+    "tailwindcss": "^3.4.17"
   }
 }

@@ -1,79 +1,32 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+@layer base {
+  * { font-family: 'Inter', system-ui, sans-serif; }
+  html, body, #root { height: 100%; }
+  body {
+    @apply bg-institucional-fundo text-institucional-texto antialiased;
+  }
 }
 
-body {
-  margin: 0;
-  background:
-    radial-gradient(circle at top left, rgba(200, 150, 62, 0.18), transparent 30rem),
-    linear-gradient(180deg, #f8f3ea 0%, #ffffff 48%, #f7f1e6 100%);
-  color: #1d2b22;
-}
-
-button, input, textarea, select {
-  font: inherit;
-}
-
-input, textarea, select {
-  outline: none;
-}
-
-input:focus, textarea:focus, select:focus {
-  border-color: #1f5a3a !important;
-  box-shadow: 0 0 0 4px rgba(31, 90, 58, 0.12);
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(22, 63, 42, 0.35);
-  border-radius: 999px;
-}
-
-.card {
-  @apply rounded-3xl bg-white/90 shadow-premium border border-white/70;
-}
-
-.btn-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-floresta px-5 py-3 font-bold text-white shadow-lg shadow-floresta/20 transition hover:bg-floresta2 disabled:cursor-not-allowed disabled:opacity-60;
-}
-
-.btn-secondary {
-  @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-floresta/20 bg-white px-4 py-2 font-bold text-floresta transition hover:bg-creme disabled:cursor-not-allowed disabled:opacity-60;
-}
-
-.field {
-  @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 placeholder:text-slate-400;
-}
-
-.label {
-  @apply mb-2 block text-sm font-bold text-slate-700;
-}
-
-.table-wrap {
-  @apply overflow-x-auto rounded-3xl border border-slate-100 bg-white shadow-premium;
-}
-
-.table {
-  @apply min-w-full divide-y divide-slate-100;
-}
-
-.table th {
-  @apply bg-creme px-4 py-3 text-left text-xs font-black uppercase tracking-wider text-floresta;
-}
-
-.table td {
-  @apply px-4 py-3 text-sm text-slate-700 align-top;
-}
-
-.badge {
-  @apply inline-flex rounded-full px-3 py-1 text-xs font-black;
+@layer components {
+  .container-institucional { @apply max-w-[1400px] mx-auto px-6; }
+  .titulo-pagina { @apply text-2xl font-bold text-gov-700 mb-1; }
+  .subtitulo-pagina { @apply text-sm text-institucional-textoSecundario mb-6; }
+  .card-oficial {
+    @apply bg-white border border-institucional-borda rounded-lg shadow-card
+           transition-all duration-200 hover:shadow-cardHover;
+  }
+  .tabela-oficial {
+    @apply w-full text-sm border-collapse;
+  }
+  .tabela-oficial th {
+    @apply bg-gov-50 text-gov-700 font-semibold text-left px-4 py-3
+           border-b border-institucional-borda uppercase text-xs tracking-wide;
+  }
+  .tabela-oficial td {
+    @apply px-4 py-3 border-b border-institucional-borda text-institucional-texto;
+  }
+  .tabela-oficial tr:hover { @apply bg-gov-50/40; }
 }
