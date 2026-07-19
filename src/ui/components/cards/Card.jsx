@@ -1,5 +1,5 @@
-﻿export const Card = ({ children, className = "", ...props }) => (
-  <div className={card-oficial p-5 } {...props}>{children}</div>
+export const Card = ({ children, className = "", ...props }) => (
+  <div className={`card-oficial p-5 ${className}`} {...props}>{children}</div>
 );
 
 export const CardCabecalho = ({ titulo, subtitulo, acao }) => (

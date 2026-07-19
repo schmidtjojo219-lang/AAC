@@ -1,4 +1,4 @@
-﻿export const Badge = ({ children, cor = "info" }) => {
+export const Badge = ({ children, cor = "info" }) => {
   const cores = {
     info: "bg-gov-100 text-gov-700",
     sucesso: "bg-green-100 text-green-700",
@@ -7,7 +7,7 @@
     neutro: "bg-gray-100 text-gray-700",
   };
   return (
-    <span className={inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold }>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${cores[cor]}`}>
       {children}
     </span>
   );
