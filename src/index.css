@@ -1,4 +1,4 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -8,6 +8,8 @@
   body {
     @apply bg-institucional-fundo text-institucional-texto antialiased;
   }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
 }
 
 @layer components {
@@ -18,15 +20,13 @@
     @apply bg-white border border-institucional-borda rounded-lg shadow-card
            transition-all duration-200 hover:shadow-cardHover;
   }
-  .tabela-oficial {
-    @apply w-full text-sm border-collapse;
-  }
+  .tabela-oficial { @apply w-full text-sm border-collapse; }
   .tabela-oficial th {
     @apply bg-gov-50 text-gov-700 font-semibold text-left px-4 py-3
            border-b border-institucional-borda uppercase text-xs tracking-wide;
   }
   .tabela-oficial td {
-    @apply px-4 py-3 border-b border-institucional-borda text-institucional-texto;
+    @apply px-4 py-3 border-b border-institucional-borda text-institucional-texto align-middle;
   }
   .tabela-oficial tr:hover { @apply bg-gov-50/40; }
 }

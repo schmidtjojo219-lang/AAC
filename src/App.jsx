@@ -11,7 +11,6 @@ import ProntuarioPage from "./modules/02-central-pessoas/pages/prontuario/Prontu
 import ListaAnimaisPage from "./modules/03-central-animal/pages/ListaAnimaisPage";
 import ProntuarioAnimalPage from "./modules/03-central-animal/pages/prontuario-veterinario/ProntuarioAnimalPage";
 
-// CENTRAL FINANCEIRA
 import FinanceiroPage from "./modules/04-central-financeira/FinanceiroPage";
 import MensalidadesPage from "./modules/04-central-financeira/mensalidades/MensalidadesPage";
 import FundosPage from "./modules/04-central-financeira/fundos/FundosPage";
@@ -30,13 +29,14 @@ const Placeholder = ({ titulo, descricao }) => (
 );
 
 export default function App() {
-  const { autenticado, carregarSessao } = useAuthStore();
+  const carregarSessao = useAuthStore(s => s.carregarSessao);
+  // 🔴 Carrega sessão UMA VEZ no boot — ANTES das rotas decidirem algo
   useEffect(() => { carregarSessao(); }, [carregarSessao]);
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={autenticado ? <Navigate to="/" replace /> : <LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/403" element={<div className="p-20 text-center"><h1 className="text-4xl font-bold text-red-600">403</h1><p>Acesso proibido</p></div>} />
 
         <Route element={<RotaProtegida><LayoutPrincipal /></RotaProtegida>}>
@@ -48,7 +48,6 @@ export default function App() {
           <Route path="animais" element={<ListaAnimaisPage />} />
           <Route path="animais/:id" element={<ProntuarioAnimalPage />} />
 
-          {/* CENTRAL FINANCEIRA — ROTAS COMPLETAS */}
           <Route path="financeiro" element={<FinanceiroPage />} />
           <Route path="financeiro/mensalidades" element={<MensalidadesPage />} />
           <Route path="financeiro/fundos" element={<FundosPage />} />

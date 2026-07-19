@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useFinanceiroStore } from "../financeiroStore";
 import { Card, CardCabecalho } from "../../../ui/components/cards/Card";
 import { Botao } from "../../../ui/components/buttons/Botao";
@@ -10,16 +10,31 @@ const statusTxt = { PAGO:"Pago", PENDENTE:"Pendente", ATRASADO:"Atrasado" };
 
 export default function MensalidadesPage() {
   const { mensalidades, pagarMensalidade } = useFinanceiroStore();
-  const [filtro, setFiltro] = useState("TODOS");
+  const [filtroStatus, setFiltroStatus] = useState("TODOS");
+  const [busca, setBusca] = useState("");
+  const [processando, setProcessando] = useState(null); // evita clique duplo
   const [toast, setToast] = useState(null);
 
-  const lista = filtro === "TODOS" ? mensalidades : mensalidades.filter(m => m.status === filtro);
+  // 🟡 BUSCA AGORA É FUNCIONAL
+  const lista = useMemo(() => {
+    const b = busca.trim().toLowerCase();
+    return mensalidades
+      .filter(m => filtroStatus === "TODOS" || m.status === filtroStatus)
+      .filter(m => !b || m.associado.toLowerCase().includes(b) || String(m.id).includes(b));
+  }, [mensalidades, filtroStatus, busca]);
 
-  const pagar = (id, nome) => {
+  const pagar = async (id, nome) => {
+    if (processando) return;
+    setProcessando(id);
     const r = pagarMensalidade(id);
-    if (r?.sucesso) {
-      setToast({ tipo: "sucesso", msg: `✅ Mensalidade de ${nome} paga! Automação executada: taxa descontada, saldos atualizados, valores distribuídos em ${4} fundos, auditoria registrada. HASH: ${r.hash.substring(0,16)}...` });
-      setTimeout(()=>setToast(null), 7000);
+    setProcessando(null);
+    if (!r) { setToast({ tipo:"erro", msg:"Erro ao processar." }); setTimeout(()=>setToast(null),4000); return; }
+    if (r.sucesso) {
+      setToast({ tipo:"sucesso", msg:`✅ SUCESSO! ${nome}: Bruto R$${r.receita.valorBruto.toFixed(2)} − Taxa R$${r.taxa.toFixed(2)} = Líquido R$${r.valorLiquido.toFixed(2)} → Distribuído em 4 Fundos. HASH: ${r.hash.substring(0,20)}...` });
+      setTimeout(()=>setToast(null), 10000);
+    } else {
+      setToast({ tipo:"erro", msg:`❌ ${r.erro}` });
+      setTimeout(()=>setToast(null), 4000);
     }
   };
 
@@ -28,28 +43,29 @@ export default function MensalidadesPage() {
       <div className="mb-6">
         <button onClick={()=>window.history.back()} className="text-sm text-gov-600 hover:underline mb-2">← Voltar</button>
         <h1 className="titulo-pagina">💳 Mensalidades</h1>
-        <p className="subtitulo-pagina !mb-0">Clique em PAGAR para testar a automação completa da Especificação v8.0</p>
+        <p className="subtitulo-pagina !mb-0">Clique em PAGAR para testar a AUTOMAÇÃO COMPLETA</p>
       </div>
 
       {toast && (
-        <div className={`mb-4 p-4 rounded-lg border ${toast.tipo==="sucesso"?"bg-green-50 border-green-200 text-green-800":"bg-red-50 border-red-200 text-red-800"}`}>
-          <p className="text-sm font-semibold">{toast.msg}</p>
+        <div className={`mb-4 p-4 rounded-lg border text-sm ${toast.tipo==="sucesso"?"bg-green-50 border-green-300 text-green-900":"bg-red-50 border-red-300 text-red-900"}`}>
+          <p className="font-semibold">{toast.msg}</p>
         </div>
       )}
 
       <Card className="!p-0 overflow-hidden">
-        <div className="p-4 border-b border-institucional-borda flex gap-2 flex-wrap">
+        <div className="p-4 border-b border-institucional-borda flex gap-2 flex-wrap items-center">
           {["TODOS","PENDENTE","ATRASADO","PAGO"].map(s => (
-            <button key={s} onClick={()=>setFiltro(s)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${filtro===s?"bg-gov-500 text-white":"bg-white border border-institucional-borda hover:bg-gov-50"}`}>
+            <button key={s} onClick={()=>setFiltroStatus(s)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${filtroStatus===s?"bg-gov-500 text-white":"bg-white border border-institucional-borda hover:bg-gov-50"}`}>
               {s} ({mensalidades.filter(m=>s==="TODOS"||m.status===s).length})
             </button>
           ))}
-          <div className="ml-auto w-64"><Input placeholder="🔍 Pesquisar associado..." /></div>
+          <div className="ml-auto w-64"><Input placeholder="🔍 Nome ou #" value={busca} onChange={e=>setBusca(e.target.value)} /></div>
         </div>
         <table className="tabela-oficial">
           <thead><tr><th>#</th><th>Associado</th><th>Valor</th><th>Vencimento</th><th>Pago em</th><th>Taxa Asaas</th><th>Status</th><th className="text-right">Ação</th></tr></thead>
           <tbody>
+            {lista.length === 0 && <tr><td colSpan={8} className="text-center py-8 text-institucional-textoSecundario">Nenhum registro encontrado</td></tr>}
             {lista.map(m => (
               <tr key={m.id}>
                 <td className="font-mono text-xs">#{m.id}</td>
@@ -61,7 +77,9 @@ export default function MensalidadesPage() {
                 <td><Badge cor={statusCor[m.status]}>{statusTxt[m.status]}</Badge></td>
                 <td className="text-right">
                   {m.status !== "PAGO"
-                    ? <Botao tamanho="sm" variante="sucesso" onClick={()=>pagar(m.id, m.associado)}>💸 Pagar (simular Asaas)</Botao>
+                    ? <Botao tamanho="sm" variante="sucesso" disabled={processando === m.id} onClick={()=>pagar(m.id, m.associado)}>
+                        {processando === m.id ? "⏳ Processando..." : "💸 Pagar (simular Asaas)"}
+                      </Botao>
                     : <Badge cor="sucesso">OK</Badge>}
                 </td>
               </tr>
@@ -71,18 +89,9 @@ export default function MensalidadesPage() {
       </Card>
 
       <Card className="mt-4 !bg-gov-50/40">
-        <p className="text-xs text-institucional-textoSecundario">
-          <strong>⚙️ O que acontece quando você clica em PAGAR?</strong><br/>
-          1. Calcula e desconta automaticamente a taxa do Asaas &nbsp;·&nbsp;
-          2. Calcula valor líquido &nbsp;·&nbsp;
-          3. <strong>Divide o valor líquido entre os 4 Fundos conforme percentuais configurados</strong> &nbsp;·&nbsp;
-          4. Atualiza saldo do Banco do Brasil &nbsp;·&nbsp;
-          5. Atualiza saldo de CADA Fundo individualmente &nbsp;·&nbsp;
-          6. Registra receita &nbsp;·&nbsp;
-          7. Gera <strong>Hash SHA-256</strong> da operação &nbsp;·&nbsp;
-          8. Registra na <strong>Auditoria Universal</strong> &nbsp;·&nbsp;
-          9. Envia notificação na Central &nbsp;·&nbsp;
-          <strong className="text-gov-700"> Tudo em 1 clique — ZERO trabalho manual.</strong>
+        <p className="text-xs text-institucional-textoSecundario leading-relaxed">
+          <strong>⚙️ Automação executada em 1 clique:</strong>
+          Bruto → Taxa Asaas → Líquido → <strong>Distribuição automática pelos Fundos (%)</strong> → Atualiza saldos → Receita → <strong>Hash SHA-256</strong> → Auditoria → Notificação.
         </p>
       </Card>
     </div>

@@ -2,19 +2,15 @@ import { twMerge } from "tailwind-merge";
 import { clsx } from "clsx";
 
 export const Botao = ({
-  children,
-  variante = "primario",
-  tamanho = "md",
-  className = "",
-  ...props
+  children, variante = "primario", tamanho = "md", className = "", ...props
 }) => {
-  const base = "inline-flex items-center justify-center gap-2 font-medium rounded-md transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed";
+  const base = "inline-flex items-center justify-center gap-2 font-medium rounded-md transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed select-none";
   const variantes = {
-    primario: "bg-gov-500 text-white hover:bg-gov-600 focus:ring-gov-500 shadow-sm",
-    secundario: "bg-white text-gov-700 border border-gov-200 hover:bg-gov-50 focus:ring-gov-300",
-    sucesso: "bg-institucional-sucesso text-white hover:opacity-90",
-    perigo: "bg-institucional-perigo text-white hover:opacity-90",
-    fantasma: "text-institucional-texto hover:bg-institucional-borda/40",
+    primario:   "bg-gov-500 text-white hover:bg-gov-600 active:bg-gov-700 focus:ring-gov-500 shadow-sm",
+    secundario: "bg-white text-gov-700 border border-gov-200 hover:bg-gov-50 active:bg-gov-100 focus:ring-gov-300",
+    sucesso:    "bg-institucional-sucesso text-white hover:opacity-90 active:opacity-100",
+    perigo:     "bg-institucional-perigo text-white hover:opacity-90 active:opacity-100",
+    fantasma:   "text-institucional-texto hover:bg-institucional-borda/40",
   };
   const tamanhos = {
     sm: "px-3 py-1.5 text-xs",

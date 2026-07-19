@@ -6,7 +6,7 @@ import { Badge } from "../components/cards/Badge";
 
 export const LayoutPrincipal = () => {
   const location = useLocation();
-  const { usuario, perfil, logout } = useAuthStore();
+  const { usuario, perfilChave, perfil, logout } = useAuthStore();
 
   return (
     <div className="flex h-screen overflow-hidden bg-institucional-fundo">
@@ -16,8 +16,8 @@ export const LayoutPrincipal = () => {
           <p className="text-gov-100 text-xs mt-0.5">Gestão Institucional</p>
         </div>
         <nav className="flex-1 overflow-y-auto py-3">
-          {MENU_CENTRAIS.filter(item => verificarPermissao(usuario?.perfil, item.permissao)).map(item => {
-            const ativo = location.pathname === item.rota;
+          {MENU_CENTRAIS.filter(item => verificarPermissao(perfilChave, item.permissao)).map(item => {
+            const ativo = location.pathname === item.rota || location.pathname.startsWith(item.rota + "/");
             return (
               <Link
                 key={item.id}
